@@ -28,6 +28,22 @@ export default function CourseRoutes(app, db) {
     res.json(courses);
   };
 
+  const findCourseById = (req, res) => {
+    const { courseId } = req.params;
+    const course = dao.findCourseById(courseId);
+    if (!course) {
+      res.status(404).json({ message: "Course not found" });
+      return;
+    }
+    res.json(course);
+  };
+
+  const findModulesForCourse = (req, res) => {
+    const { courseId } = req.params;
+    const modules = db.modules.filter((module) => module.course === courseId);
+    res.json(modules);
+  };
+
   const updateCourse = (req, res) => {
     const { courseId } = req.params;
     const courseUpdates = req.body;
@@ -35,6 +51,8 @@ export default function CourseRoutes(app, db) {
     res.send(status);
   }
   app.get("/api/courses", findAllCourses);
+  app.get("/api/courses/:courseId", findCourseById);
+  app.get("/api/courses/:courseId/modules", findModulesForCourse);
   app.post("/api/courses", createCourse);
   app.put("/api/courses/:courseId", updateCourse);
   app.get("/api/users/:userId/courses", findCoursesForEnrolledUser);
