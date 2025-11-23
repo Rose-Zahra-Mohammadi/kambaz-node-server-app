@@ -12,7 +12,6 @@ export default function CourseRoutes(app, db) {
       return;
     }
     const newCourse = dao.createCourse(req.body);
-    enrollmentsDao.enrollUserInCourse(currentUser._id, newCourse._id);
     res.json(newCourse);
   };
 

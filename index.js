@@ -6,6 +6,7 @@ import Lab5 from './Lab5/index.js';
 import cors from 'cors';
 import UserRoutes from './Kambaz/Users/routes.js';
 import CourseRoutes from './Kambaz/Courses/routes.js';
+import EnrollmentRoutes from './Kambaz/Enrollments/routes.js';
 import db from './Kambaz/Database/index.js';
 const app = express()
 app.use(cors({
@@ -31,5 +32,6 @@ app.use(express.json());
 UserRoutes(app, db);
 Hello(app);
 CourseRoutes(app, db);
+EnrollmentRoutes(app, db);
 Lab5(app);
 app.listen(process.env.PORT || 4000)
