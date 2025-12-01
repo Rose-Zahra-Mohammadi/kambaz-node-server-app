@@ -29,14 +29,19 @@ export default function UserRoutes(app) {
     res.json(user);
    };
   const updateUser = async (req, res) => {
-    const {userId}= req.params;
-    const userUpdates = req.body;
-    await dao.updateUser(userId, userUpdates);
-    const currentUser = req.session["currentUser"];
-    if (currentUser && currentUser._id === userId) {
-      req.session["currentUser"] = {...currentUser, ...userUpdates};
+    try {
+      const {userId}= req.params;
+      const userUpdates = req.body;
+      await dao.updateUser(userId, userUpdates);
+      const updatedUser = await dao.findUserById(userId);
+      const currentUser = req.session["currentUser"];
+      if (currentUser && currentUser._id === userId) {
+        req.session["currentUser"] = updatedUser;
+      }
+      res.json(updatedUser);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating user", error: error.message });
     }
-    res.sendStatus(currentUser);
    };
   const signup = async (req, res) => {
     const user = await dao.findUserByUsername(req.body.username);
