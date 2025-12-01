@@ -1,32 +1,38 @@
 import { v4 as uuidv4 } from "uuid";
 import model from "./model.js";
+import enrollmentModel from "../Enrollments/model.js";
+
 export default function CoursesDao(db) {
-  function findAllCourses() {
-    return model.find({}, {name: 1, description: 1});
+  async function findAllCourses() {
+    return await model.find().lean();
   }
-  function findCourseById(courseId) {
-    return db.courses.find((course) => course._id === courseId);
+
+  async function findCourseById(courseId) {
+    return await model.findById(courseId);
   }
+
   async function findCoursesForEnrolledUser(userId) {
-    const { enrollments } = db;
-    const courses = await model.find({}, {name: 1, description: 1});
-    const enrolledCourses = courses.filter((course) =>
-      enrollments.some((enrollment) => enrollment.user === userId && enrollment.course === course._id));
-    return enrolledCourses;
+    // Get all enrollments for this user
+    const enrollments = await enrollmentModel.find({ user: userId });
+    const courseIds = enrollments.map(e => e.course);
+    // Get all courses where user is enrolled
+    const courses = await model.find({ _id: { $in: courseIds } });
+    return courses;
   }
-  function createCourse(course) {
+
+  async function createCourse(course) {
     const newCourse = { ...course, _id: uuidv4() };
-    return model.create(newCourse);
+    return await model.create(newCourse);
   }
 
-  function deleteCourse(courseId) {
-    return model.deleteOne({ _id: courseId });
+  async function deleteCourse(courseId) {
+    return await model.deleteOne({ _id: courseId });
   }
 
-  function updateCourse(courseId, courseUpdates) {
-    return model.updateOne({ _id: courseId }, { $set: courseUpdates });
+  async function updateCourse(courseId, courseUpdates) {
+    return await model.updateOne({ _id: courseId }, { $set: courseUpdates });
   }
   
 
-  return { findAllCourses, findCourseById, findCoursesForEnrolledUser, createCourse, deleteCourse };
+  return { findAllCourses, findCourseById, findCoursesForEnrolledUser, createCourse, deleteCourse, updateCourse };
 }
